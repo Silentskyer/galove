@@ -112,7 +112,7 @@ export function ReadingForm({
     <>
       <section className="section">
         <div className="section-title">
-          <span className="eyebrow">Input</span>
+          <span className="eyebrow">輸入流程</span>
           <h2>分析輸入流程</h2>
           <p>
             這裡已接上實際送出流程。填入問題後，系統會將主題、方法與描述整理成提示詞，再送往 Gemini
@@ -304,7 +304,7 @@ export function ReadingForm({
 
       <section className="section">
         <div className="section-title">
-          <span className="eyebrow">Result</span>
+          <span className="eyebrow">解析結果</span>
           <h2>AI 解析結果</h2>
           <p>
             回應會拆成多個閱讀區塊，讓使用者比較容易理解情勢、提醒與下一步。
@@ -349,7 +349,7 @@ export function ReadingForm({
                 value: "提交表單後，這裡會顯示 Gemini 整理後的解析內容。",
               }))).map((item, index) => (
             <article className="result-card" key={`${item.title}-${index}`}>
-              <strong>Result 0{index + 1}</strong>
+              <strong>結果 0{index + 1}</strong>
               <h3>{item.title}</h3>
               <p>{item.value}</p>
             </article>

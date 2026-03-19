@@ -30,7 +30,7 @@ export default async function ReadingTopicPage({ params }: PageProps) {
   }
 
   return (
-    <main className="reading-page">
+    <main className={`reading-page reading-page-${theme.slug}`}>
       <div className="shell">
         <section className="reading-hero">
           <span className="eyebrow">{theme.label}</span>
@@ -58,15 +58,15 @@ export default async function ReadingTopicPage({ params }: PageProps) {
 
           <div className="flow-grid">
             <article className="flow-step">
-              <strong>Step 01</strong>
+              <strong>步驟一</strong>
               選擇解析方法：星座、紫微斗數或塔羅。
             </article>
             <article className="flow-step">
-              <strong>Step 02</strong>
+              <strong>步驟二</strong>
               輸入個人資料、問題背景或抽牌資訊。
             </article>
             <article className="flow-step">
-              <strong>Step 03</strong>
+              <strong>步驟三</strong>
               由 Gemini 整理分析結果與可行建議。
             </article>
           </div>
@@ -84,7 +84,7 @@ export default async function ReadingTopicPage({ params }: PageProps) {
           <div className="method-grid">
             {methods.map((method, index) => (
               <article className="method-card" key={method.name}>
-                <div className="method-index">Method 0{index + 1}</div>
+                <div className="method-index">方法 0{index + 1}</div>
                 <h3>{method.name}</h3>
                 <p>{method.description}</p>
               </article>
