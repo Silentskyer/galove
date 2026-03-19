@@ -6,6 +6,8 @@ export type ReadingFormValues = {
   topic: TopicSlug;
   method: MethodName;
   birthInfo: string;
+  concern?: string;
+  desiredOutcome?: string;
   question: string;
   extraContext?: string;
 };

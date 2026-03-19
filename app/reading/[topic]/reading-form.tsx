@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { methods } from "@/data/site";
 import { getMethodModule } from "@/lib/modules";
+import { getTopicModule } from "@/lib/topics";
 import type {
   MethodName,
   ReadingApiResponse,
@@ -35,10 +36,13 @@ export function ReadingForm({
   prompts,
   resultPreview,
 }: ReadingFormProps) {
+  const topicModule = getTopicModule(topic);
   const [form, setForm] = useState<ReadingFormValues>({
     topic,
     method: "星座",
     birthInfo: "",
+    concern: topicModule.concernOptions[0],
+    desiredOutcome: "",
     question: "",
     extraContext: "",
   });
@@ -119,6 +123,26 @@ export function ReadingForm({
               </div>
 
               <div className="field">
+                <label htmlFor="concern">{topicModule.concernLabel}</label>
+                <select
+                  id="concern"
+                  value={form.concern}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      concern: event.target.value,
+                    }))
+                  }
+                >
+                  {topicModule.concernOptions.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="field">
                 <label htmlFor="birth">出生資訊 / 參考時間</label>
                 <input
                   id="birth"
@@ -135,10 +159,26 @@ export function ReadingForm({
               </div>
 
               <div className="field">
+                <label htmlFor="desiredOutcome">{topicModule.goalLabel}</label>
+                <input
+                  id="desiredOutcome"
+                  placeholder={topicModule.goalPlaceholder}
+                  type="text"
+                  value={form.desiredOutcome}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      desiredOutcome: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="field">
                 <label htmlFor="extraContext">補充資訊</label>
                 <textarea
                   id="extraContext"
-                  placeholder="例如抽牌結果、對象背景、最近發生的事，或你想補充的心情"
+                  placeholder={topicModule.extraPlaceholder}
                   value={form.extraContext}
                   onChange={(event) =>
                     setForm((current) => ({
@@ -175,6 +215,16 @@ export function ReadingForm({
           </div>
 
           <div className="result-panel">
+            <div className="field">
+              <label>主題分析模組</label>
+              <div className="module-card">
+                <strong>{topicModule.mascot}</strong>
+                <p>{topicModule.summary}</p>
+                <p>聚焦重點：{topicModule.focusAreas.join("、")}</p>
+                <p>結果語氣：{topicModule.resultTone}</p>
+              </div>
+            </div>
+
             <div className="field">
               <label>目前方法模組</label>
               <div className="module-card">
@@ -222,7 +272,7 @@ export function ReadingForm({
             </div>
 
             <p className="helper-text">
-              {topicLabel}主題會優先產出一份溫柔但具體的整理，避免只有抽象形容。
+              {topicLabel}主題會優先聚焦 {topicModule.focusAreas.join("、")}，讓結果更貼近實際狀況。
             </p>
           </div>
         </div>

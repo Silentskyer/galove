@@ -1,5 +1,6 @@
 import type { MethodName, ReadingFormValues, TopicSlug } from "@/types/reading";
 import { buildMethodPromptBlock } from "@/lib/modules";
+import { buildTopicPromptBlock } from "@/lib/topics";
 
 const topicLabels: Record<TopicSlug, string> = {
   love: "戀愛",
@@ -25,6 +26,7 @@ export function buildGeminiPrompt(values: ReadingFormValues) {
 
 主題重點：
 ${topicFocus[values.topic]}
+${buildTopicPromptBlock(values.topic, values.concern, values.desiredOutcome)}
 
 解析方法：
 ${values.method}
@@ -35,6 +37,8 @@ ${buildMethodPromptBlock(values.method, values.topic)}
 - 主題：${topicLabels[values.topic]}
 - 方法：${values.method}
 - 出生資訊或參考時間：${values.birthInfo || "未提供"}
+- 當前卡點：${values.concern?.trim() || "未提供"}
+- 期待方向：${values.desiredOutcome?.trim() || "未提供"}
 - 問題描述：${values.question}
 - 額外補充：${values.extraContext?.trim() || "未提供"}
 
@@ -75,6 +79,14 @@ export function validateReadingInput(values: Partial<ReadingFormValues>) {
 
   if ((values.birthInfo || "").trim().length > 120) {
     return "出生資訊或參考時間過長，請精簡後再試。";
+  }
+
+  if ((values.concern || "").trim().length > 80) {
+    return "當前卡點內容過長，請精簡後再試。";
+  }
+
+  if ((values.desiredOutcome || "").trim().length > 160) {
+    return "期待方向內容過長，請精簡後再試。";
   }
 
   if (values.question.trim().length > 1200) {
