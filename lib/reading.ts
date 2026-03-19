@@ -25,6 +25,13 @@ const methodGuides: Record<MethodName, string> = {
 };
 
 export function buildGeminiPrompt(values: ReadingFormValues) {
+  const methodFieldLabel =
+    values.method === "星座"
+      ? "星象關聯"
+      : values.method === "紫微斗數"
+        ? "命格脈絡"
+        : "牌組訊號";
+
   return `
 你是一位細膩、溫柔、克制的命運顧問，要為使用者提供 ${topicLabels[values.topic]} 主題的解析。
 
@@ -61,6 +68,7 @@ ${buildSafetyPromptBlock()}
 請只輸出 JSON，格式如下：
 {
   "summary": "整體情勢解讀，2 到 3 句",
+  "methodFocus": "${methodFieldLabel}，必須明確寫出該方法專屬的依據與觀察，2 到 3 句",
   "insight": "對當前狀態的核心觀察，2 到 3 句",
   "action": "接下來可採取的溫和行動建議，2 到 3 句",
   "caution": "需要留意的風險、誤區或提醒，1 到 2 句",
@@ -121,4 +129,16 @@ export function normalizeModelOutput(partial: Partial<ReadingFormValues>) {
     birthInfo: partial.birthInfo?.trim() || "",
     extraContext: partial.extraContext?.trim() || "",
   };
+}
+
+export function getMethodResultLabel(method: MethodName) {
+  if (method === "星座") {
+    return "星象關聯";
+  }
+
+  if (method === "紫微斗數") {
+    return "命格脈絡";
+  }
+
+  return "牌組訊號";
 }

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { methods } from "@/data/site";
 import { getMethodModule } from "@/lib/modules";
+import { getMethodResultLabel } from "@/lib/reading";
 import { getTopicModule } from "@/lib/topics";
 import type {
   MethodName,
@@ -18,17 +19,6 @@ type ReadingFormProps = {
   prompts: readonly string[];
   resultPreview: readonly string[];
 };
-
-const resultLabels: Array<{
-  key: keyof ReadingResult;
-  title: string;
-}> = [
-  { key: "summary", title: "整體情勢" },
-  { key: "insight", title: "核心觀察" },
-  { key: "action", title: "溫和行動" },
-  { key: "caution", title: "留意提醒" },
-  { key: "closing", title: "收尾訊息" },
-];
 
 export function ReadingForm({
   topic,
@@ -52,6 +42,18 @@ export function ReadingForm({
   const [model, setModel] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const module = getMethodModule(form.method);
+  const methodResultLabel = getMethodResultLabel(form.method);
+  const displayResultLabels: Array<{
+    key: keyof ReadingResult;
+    title: string;
+  }> = [
+    { key: "summary", title: "整體情勢" },
+    { key: "methodFocus", title: methodResultLabel },
+    { key: "insight", title: "核心觀察" },
+    { key: "action", title: "溫和行動" },
+    { key: "caution", title: "留意提醒" },
+    { key: "closing", title: "收尾訊息" },
+  ];
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -340,11 +342,14 @@ export function ReadingForm({
 
         <div className="result-grid">
           {(result
-            ? resultLabels.map((item) => ({
+            ? displayResultLabels.map((item) => ({
                 title: item.title,
                 value: result[item.key],
               }))
-            : resultPreview.map((item) => ({
+            : [
+                ...resultPreview,
+                methodResultLabel,
+              ].map((item) => ({
                 title: item,
                 value: "提交表單後，這裡會顯示 Gemini 整理後的解析內容。",
               }))).map((item, index) => (

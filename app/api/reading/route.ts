@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   buildGeminiPrompt,
   extractJsonObject,
+  getMethodResultLabel,
   normalizeModelOutput,
   validateReadingInput,
 } from "@/lib/reading";
@@ -11,7 +12,11 @@ import type { ReadingApiResponse, ReadingFormValues, ReadingResult } from "@/typ
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
-function safeResult(topic: ReadingFormValues["topic"], partial: Partial<ReadingResult>): ReadingResult {
+function safeResult(
+  topic: ReadingFormValues["topic"],
+  method: ReadingFormValues["method"],
+  partial: Partial<ReadingResult>,
+): ReadingResult {
   const fallbackByTopic = {
     love: {
       summary: "眼前的感情節奏還在慢慢定型，現在更重要的是先辨認彼此的真實需求。",
@@ -37,9 +42,16 @@ function safeResult(topic: ReadingFormValues["topic"], partial: Partial<ReadingR
   } as const;
 
   const fallback = fallbackByTopic[topic];
+  const methodFocusFallback =
+    method === "星座"
+      ? "從近期星辰與行星節奏來看，你現在的情緒與互動感受像是被幾股不同能量同時牽引，關鍵在於看懂彼此星象之間的落差與呼應。"
+      : method === "紫微斗數"
+        ? "從命格與主星脈絡來看，你此刻面對的課題不只是眼前事件，而是命盤裡長期處事模式與當前流年節奏被一起放大。"
+        : "從牌組與牌陣訊號來看，現在浮現的不是單一好壞，而是幾張牌意共同指出你內心猶豫與外部情勢正在互相拉扯。";
 
   return {
     summary: partial.summary?.trim() || fallback.summary,
+    methodFocus: partial.methodFocus?.trim() || methodFocusFallback,
     insight: partial.insight?.trim() || fallback.insight,
     action: partial.action?.trim() || fallback.action,
     caution: partial.caution?.trim() || fallback.caution,
@@ -132,7 +144,11 @@ export async function POST(request: Request) {
 
     const parsed = JSON.parse(jsonText) as Partial<ReadingResult>;
     const response: ReadingApiResponse = {
-      result: safeResult((normalizedPayload as ReadingFormValues).topic, parsed),
+      result: safeResult(
+        (normalizedPayload as ReadingFormValues).topic,
+        (normalizedPayload as ReadingFormValues).method,
+        parsed,
+      ),
       model: GEMINI_MODEL,
     };
 

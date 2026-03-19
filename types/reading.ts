@@ -14,6 +14,7 @@ export type ReadingFormValues = {
 
 export type ReadingResult = {
   summary: string;
+  methodFocus: string;
   insight: string;
   action: string;
   caution: string;
