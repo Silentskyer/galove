@@ -4,9 +4,13 @@ import { methods, principles, themes } from "@/data/site";
 import { ReadingForm } from "./reading-form";
 
 type PageProps = {
-  params: {
+  params:
+    | {
+        topic: string;
+      }
+    | Promise<{
     topic: string;
-  };
+      }>;
 };
 
 export function generateStaticParams() {
@@ -15,8 +19,10 @@ export function generateStaticParams() {
   }));
 }
 
-export default function ReadingTopicPage({ params }: PageProps) {
-  const { topic } = params;
+export const dynamicParams = false;
+
+export default async function ReadingTopicPage({ params }: PageProps) {
+  const { topic } = await Promise.resolve(params);
   const theme = themes.find((item) => item.slug === topic);
 
   if (!theme) {
