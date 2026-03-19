@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function AboutPage() {
   return (
     <main className="about-page">
@@ -23,6 +25,14 @@ export default function AboutPage() {
           <p>
             在金融主題上，系統會避免提供明確投資指示，而改以風險提示與情境分析為主。
           </p>
+          <div className="hero-actions">
+            <Link className="button-secondary" href="/privacy">
+              查看隱私權政策
+            </Link>
+            <Link className="button-secondary" href="/terms">
+              查看使用條款
+            </Link>
+          </div>
         </section>
       </div>
     </main>

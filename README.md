@@ -22,6 +22,7 @@
 - 已完成專案骨架
 - 已完成首頁與主題入口初版
 - 已完成分析流程與 Gemini API route
+- 已加入 SEO metadata、sitemap、robots、隱私權政策與使用條款頁
 
 ## Gemini Integration
 
@@ -30,3 +31,9 @@
 - Current model: `gemini-2.5-flash`
 
 Gemini API 的 REST `generateContent` 端點與 `x-goog-api-key` header 寫法，依官方 Gemini API 文件與 Quickstart 實作。
+
+## Deployment
+
+- GitHub: `https://github.com/Silentskyer/galove`
+- Vercel framework: `Next.js`
+- 詳細部署步驟請見 `docs/deployment.md`
