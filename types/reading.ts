@@ -7,6 +7,7 @@ export type ReadingFormValues = {
   method: MethodName;
   birthInfo: string;
   question: string;
+  extraContext?: string;
 };
 
 export type ReadingResult = {
@@ -21,4 +22,3 @@ export type ReadingApiResponse = {
   result: ReadingResult;
   model: string;
 };
-

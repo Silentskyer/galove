@@ -1,4 +1,5 @@
 import type { MethodName, ReadingFormValues, TopicSlug } from "@/types/reading";
+import { buildMethodPromptBlock } from "@/lib/modules";
 
 const topicLabels: Record<TopicSlug, string> = {
   love: "戀愛",
@@ -28,16 +29,19 @@ ${topicFocus[values.topic]}
 解析方法：
 ${values.method}
 ${methodGuides[values.method]}
+${buildMethodPromptBlock(values.method, values.topic)}
 
 使用者資料：
 - 主題：${topicLabels[values.topic]}
 - 方法：${values.method}
 - 出生資訊或參考時間：${values.birthInfo || "未提供"}
 - 問題描述：${values.question}
+- 額外補充：${values.extraContext?.trim() || "未提供"}
 
 回應規則：
 - 使用繁體中文。
 - 保持神秘感與陪伴感，但不要做絕對預言。
+- 整體風格要像可愛的命運小夥伴在陪伴使用者，但內容仍要實用。
 - 金融主題禁止提供明確投資指示，請改為風險提醒與保守建議。
 - 不要提到你是 AI 或模型。
 - 內容要具體、溫柔、容易閱讀。
@@ -77,6 +81,10 @@ export function validateReadingInput(values: Partial<ReadingFormValues>) {
     return "問題描述過長，請控制在 1200 字內。";
   }
 
+  if ((values.extraContext || "").trim().length > 600) {
+    return "補充資訊過長，請控制在 600 字內。";
+  }
+
   return null;
 }
 
@@ -84,4 +92,3 @@ export function extractJsonObject(text: string) {
   const match = text.match(/\{[\s\S]*\}/);
   return match ? match[0] : null;
 }
-

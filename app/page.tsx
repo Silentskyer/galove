@@ -1,5 +1,7 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { methods, principles, themes } from "@/data/site";
+import { methodModules } from "@/data/modules";
 
 export default function HomePage() {
   return (
@@ -7,15 +9,15 @@ export default function HomePage() {
       <section className="hero">
         <div className="shell hero-grid">
           <div className="hero-copy">
-            <span className="eyebrow">Destiny Reading Studio</span>
+            <span className="eyebrow">Cute Destiny Playground</span>
             <h1>
-              把命運的線索
+              用 Q 版命運小夥伴
               <br />
-              轉譯成你今晚看得懂的答案
+              陪你拆開今天的運勢驚喜包
             </h1>
             <p>
               這是一個結合星座、紫微斗數、塔羅與 Gemini AI
-              的運勢解析網站。你可以從戀愛、工作、金融切入，讓神秘學的訊號被整理成更貼近生活的建議。
+              的可愛系運勢解析網站。你可以從戀愛、工作、金融切入，讓神秘學的訊號被整理成更貼近生活、又更像被小精靈陪伴的建議。
             </p>
             <div className="hero-actions">
               <Link className="button-primary" href="#themes">
@@ -28,21 +30,30 @@ export default function HomePage() {
           </div>
 
           <div className="hero-card" aria-hidden="true">
-            <div className="orb one" />
-            <div className="orb two" />
-            <div className="constellation">
-              <span style={{ top: "18%", left: "26%" }} />
-              <span style={{ top: "38%", left: "55%" }} />
-              <span style={{ top: "30%", left: "72%" }} />
-              <span style={{ top: "58%", left: "24%" }} />
-              <span style={{ top: "66%", left: "66%" }} />
-              <svg viewBox="0 0 100 100" fill="none">
-                <path
-                  d="M25 20L55 38L72 30L65 66L24 58L55 38"
-                  stroke="rgba(255,247,222,0.65)"
-                  strokeWidth="0.9"
-                />
-              </svg>
+            <div className="sticker-cloud pink" />
+            <div className="sticker-cloud mint" />
+            <div className="mascot-stage">
+              <div className="mascot mascot-rabbit">
+                <span className="face eye left" />
+                <span className="face eye right" />
+                <span className="face blush left" />
+                <span className="face blush right" />
+              </div>
+              <div className="mascot mascot-bear">
+                <span className="face eye left" />
+                <span className="face eye right" />
+                <span className="face blush left" />
+                <span className="face blush right" />
+              </div>
+              <div className="mascot mascot-cat">
+                <span className="face eye left" />
+                <span className="face eye right" />
+                <span className="face blush left" />
+                <span className="face blush right" />
+              </div>
+              <div className="sparkle sparkle-a">★</div>
+              <div className="sparkle sparkle-b">✦</div>
+              <div className="sparkle sparkle-c">✿</div>
             </div>
           </div>
         </div>
@@ -67,11 +78,12 @@ export default function HomePage() {
                 style={
                   {
                     ["--card-accent" as string]: theme.accent,
-                  } as React.CSSProperties
+                  } as CSSProperties
                 }
               >
                 <span className="eyebrow">{theme.label}</span>
                 <h3>{theme.title}</h3>
+                <div className="theme-mascot">{theme.mascot}</div>
                 <p>{theme.intro}</p>
                 <span className="theme-link">進入解析入口 →</span>
               </Link>
@@ -97,6 +109,30 @@ export default function HomePage() {
                 <div className="method-index">Method 0{index + 1}</div>
                 <h3>{method.name}</h3>
                 <p>{method.description}</p>
+                <p>{method.vibe}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="shell">
+          <div className="section-title">
+            <span className="eyebrow">Modules</span>
+            <h2>三個命運模組，三位 Q 版夥伴</h2>
+            <p>
+              我們把每種解析方式都整理成可擴充的模組，之後不管要接更多欄位、命盤規則或牌陣，都可以沿著同一套結構成長。
+            </p>
+          </div>
+
+          <div className="method-grid">
+            {Object.values(methodModules).map((module) => (
+              <article className="method-card" key={module.name}>
+                <div className="method-index">{module.mascot}</div>
+                <h3>{module.name}模組</h3>
+                <p>{module.summary}</p>
+                <p>必要欄位：{module.requiredFields.join("、")}</p>
               </article>
             ))}
           </div>
@@ -126,4 +162,3 @@ export default function HomePage() {
     </main>
   );
 }
-

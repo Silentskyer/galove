@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { methods } from "@/data/site";
+import { getMethodModule } from "@/lib/modules";
 import type {
   MethodName,
   ReadingApiResponse,
@@ -39,11 +40,13 @@ export function ReadingForm({
     method: "星座",
     birthInfo: "",
     question: "",
+    extraContext: "",
   });
   const [result, setResult] = useState<ReadingResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const module = getMethodModule(form.method);
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -132,6 +135,22 @@ export function ReadingForm({
               </div>
 
               <div className="field">
+                <label htmlFor="extraContext">補充資訊</label>
+                <textarea
+                  id="extraContext"
+                  placeholder="例如抽牌結果、對象背景、最近發生的事，或你想補充的心情"
+                  value={form.extraContext}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      extraContext: event.target.value,
+                    }))
+                  }
+                />
+                <small>不同方法可搭配不同補充資料，讓解析更貼近你的情境。</small>
+              </div>
+
+              <div className="field">
                 <label htmlFor="question">你目前最想提問的事情</label>
                 <textarea
                   id="question"
@@ -156,6 +175,18 @@ export function ReadingForm({
           </div>
 
           <div className="result-panel">
+            <div className="field">
+              <label>目前方法模組</label>
+              <div className="module-card">
+                <strong>
+                  {module.mascot}陪你看 {form.method}
+                </strong>
+                <p>{module.summary}</p>
+                <p>必要欄位：{module.requiredFields.join("、")}</p>
+                <p>可補充欄位：{module.optionalFields.join("、")}</p>
+              </div>
+            </div>
+
             <div className="field">
               <label>建議追問方向</label>
               <div className="chip-row">
@@ -231,4 +262,3 @@ export function ReadingForm({
     </>
   );
 }
-
