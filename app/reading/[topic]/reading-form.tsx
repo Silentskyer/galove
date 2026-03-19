@@ -48,6 +48,7 @@ export function ReadingForm({
   });
   const [result, setResult] = useState<ReadingResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [model, setModel] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const module = getMethodModule(form.method);
@@ -55,6 +56,7 @@ export function ReadingForm({
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    setErrorCode(null);
 
     startTransition(async () => {
       try {
@@ -72,19 +74,38 @@ export function ReadingForm({
           setResult(null);
           setModel(null);
           setError(data.error || "解析失敗，請稍後再試。");
+          setErrorCode(data.code || null);
           return;
         }
 
         setResult(data.result);
         setModel(data.model);
+        setErrorCode(null);
       } catch (fetchError) {
         const message =
           fetchError instanceof Error ? fetchError.message : "無法連線到伺服器";
         setResult(null);
         setModel(null);
         setError(message);
+        setErrorCode("NETWORK_ERROR");
       }
     });
+  };
+
+  const resetForm = () => {
+    setForm({
+      topic,
+      method: "星座",
+      birthInfo: "",
+      concern: topicModule.concernOptions[0],
+      desiredOutcome: "",
+      question: "",
+      extraContext: "",
+    });
+    setResult(null);
+    setError(null);
+    setErrorCode(null);
+    setModel(null);
   };
 
   return (
@@ -211,6 +232,9 @@ export function ReadingForm({
               <button className="button-primary submit-button" disabled={isPending} type="submit">
                 {isPending ? "解析中..." : `開始${topicLabel}解析`}
               </button>
+              <button className="button-secondary submit-button" type="button" onClick={resetForm}>
+                清空重填
+              </button>
             </form>
           </div>
 
@@ -287,7 +311,32 @@ export function ReadingForm({
           </p>
         </div>
 
-        {error ? <div className="error-banner">{error}</div> : null}
+        {error ? (
+          <div className="error-banner">
+            <strong>目前無法完成解析</strong>
+            <p>{error}</p>
+            {errorCode ? <p className="error-code">錯誤代碼：{errorCode}</p> : null}
+            <div className="hero-actions compact-actions">
+              <button
+                className="button-primary"
+                onClick={() => {
+                  setError(null);
+                  setErrorCode(null);
+                }}
+                type="button"
+              >
+                關閉提醒
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {isPending ? (
+          <div className="pending-card">
+            <strong>小夥伴正在整理命運線索</strong>
+            <p>系統正在組合主題、方法與安全規則，請再等一下下。</p>
+          </div>
+        ) : null}
 
         <div className="result-grid">
           {(result
@@ -308,6 +357,7 @@ export function ReadingForm({
         </div>
 
         {model ? <p className="model-note">本次解析模型：{model}</p> : null}
+        <p className="model-note">結果僅供方向整理與自我反思，不取代專業意見。</p>
       </section>
     </>
   );

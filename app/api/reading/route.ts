@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import {
   buildGeminiPrompt,
   extractJsonObject,
+  normalizeModelOutput,
   validateReadingInput,
 } from "@/lib/reading";
+import { detectSafetyRisk } from "@/lib/safety";
 import type { ReadingApiResponse, ReadingFormValues, ReadingResult } from "@/types/reading";
 
 const GEMINI_MODEL = "gemini-2.5-flash";
@@ -46,23 +48,39 @@ function safeResult(topic: ReadingFormValues["topic"], partial: Partial<ReadingR
 }
 
 export async function POST(request: Request) {
-  const payload = (await request.json()) as Partial<ReadingFormValues>;
-  const error = validateReadingInput(payload);
+  const payload = {
+    ...(await request.json()),
+  } as Partial<ReadingFormValues>;
+  const normalizedPayload = {
+    ...payload,
+    ...normalizeModelOutput(payload),
+  } as Partial<ReadingFormValues>;
+  const safetyError = detectSafetyRisk(normalizedPayload);
+
+  if (safetyError) {
+    return NextResponse.json({ error: safetyError, code: "SAFETY_BLOCKED" }, { status: 422 });
+  }
+  const error = validateReadingInput(normalizedPayload);
 
   if (error) {
-    return NextResponse.json({ error }, { status: 400 });
+    return NextResponse.json({ error, code: "INVALID_INPUT" }, { status: 400 });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json(
-      { error: "尚未設定 GEMINI_API_KEY，請先在環境變數中加入 Gemini 金鑰。" },
+      {
+        error: "尚未設定 GEMINI_API_KEY，請先在環境變數中加入 Gemini 金鑰。",
+        code: "MISSING_API_KEY",
+      },
       { status: 503 },
     );
   }
 
-  const prompt = buildGeminiPrompt(payload as ReadingFormValues);
+  const prompt = buildGeminiPrompt(normalizedPayload as ReadingFormValues);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 18000);
 
   try {
     const geminiResponse = await fetch(GEMINI_URL, {
@@ -83,12 +101,16 @@ export async function POST(request: Request) {
         },
       }),
       cache: "no-store",
+      signal: controller.signal,
     });
 
     if (!geminiResponse.ok) {
       const detail = await geminiResponse.text();
       return NextResponse.json(
-        { error: `Gemini API 請求失敗：${detail || geminiResponse.statusText}` },
+        {
+          error: `Gemini API 請求失敗：${detail || geminiResponse.statusText}`,
+          code: "UPSTREAM_ERROR",
+        },
         { status: 502 },
       );
     }
@@ -103,23 +125,31 @@ export async function POST(request: Request) {
 
     if (!jsonText) {
       return NextResponse.json(
-        { error: "Gemini 回傳格式無法解析，請稍後再試。" },
+        { error: "Gemini 回傳格式無法解析，請稍後再試。", code: "INVALID_MODEL_OUTPUT" },
         { status: 502 },
       );
     }
 
     const parsed = JSON.parse(jsonText) as Partial<ReadingResult>;
     const response: ReadingApiResponse = {
-      result: safeResult((payload as ReadingFormValues).topic, parsed),
+      result: safeResult((normalizedPayload as ReadingFormValues).topic, parsed),
       model: GEMINI_MODEL,
     };
 
     return NextResponse.json(response);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "未知錯誤";
+    const code = error instanceof Error && error.name === "AbortError" ? "UPSTREAM_TIMEOUT" : "INTERNAL_ERROR";
+    const message =
+      error instanceof Error && error.name === "AbortError"
+        ? "解析等待時間較長，請稍後重試。"
+        : error instanceof Error
+          ? error.message
+          : "未知錯誤";
     return NextResponse.json(
-      { error: `目前無法完成解析，請稍後再試。${message}` },
+      { error: `目前無法完成解析，請稍後再試。${message}`, code },
       { status: 500 },
     );
+  } finally {
+    clearTimeout(timeout);
   }
 }

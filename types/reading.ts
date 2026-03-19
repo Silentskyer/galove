@@ -23,4 +23,5 @@ export type ReadingResult = {
 export type ReadingApiResponse = {
   result: ReadingResult;
   model: string;
+  code?: string;
 };

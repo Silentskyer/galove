@@ -1,5 +1,6 @@
 import type { MethodName, ReadingFormValues, TopicSlug } from "@/types/reading";
 import { buildMethodPromptBlock } from "@/lib/modules";
+import { buildSafetyPromptBlock } from "@/lib/safety";
 import { buildTopicPromptBlock } from "@/lib/topics";
 
 const topicLabels: Record<TopicSlug, string> = {
@@ -49,6 +50,7 @@ ${buildMethodPromptBlock(values.method, values.topic)}
 - 金融主題禁止提供明確投資指示，請改為風險提醒與保守建議。
 - 不要提到你是 AI 或模型。
 - 內容要具體、溫柔、容易閱讀。
+${buildSafetyPromptBlock()}
 
 請只輸出 JSON，格式如下：
 {
@@ -103,4 +105,14 @@ export function validateReadingInput(values: Partial<ReadingFormValues>) {
 export function extractJsonObject(text: string) {
   const match = text.match(/\{[\s\S]*\}/);
   return match ? match[0] : null;
+}
+
+export function normalizeModelOutput(partial: Partial<ReadingFormValues>) {
+  return {
+    concern: partial.concern?.trim() || "",
+    desiredOutcome: partial.desiredOutcome?.trim() || "",
+    question: partial.question?.trim() || "",
+    birthInfo: partial.birthInfo?.trim() || "",
+    extraContext: partial.extraContext?.trim() || "",
+  };
 }
